@@ -12,5 +12,10 @@ public class MainController {
 	public String fieldPos(Model model) {
 		return "field_pos";
 	}
+	
+	@GetMapping("/images-viewer")
+	public String imagesViewer(Model model) {
+		return "images_viewer";
+	}
 
 }

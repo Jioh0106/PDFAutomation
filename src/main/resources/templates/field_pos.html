@@ -1,17 +1,20 @@
 <!DOCTYPE HTML>
-<html xmlns="http://www.w3.org/1999/xhtml"
-      xmlns:th="http://www.thymeleaf.org">
-	<head>
-		<meta charset="UTF-8">
-		<title>엑셀 업로드</title>
-	</head>
-	
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+  
+<head>
+	<meta charset="UTF-8">
+	<title>PDF Automation</title>
 	<!-- Bootstrap CSS CDN -->
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 	<!-- TOAST UI CSS CDN -->
 	<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
 
 	<style>
+		.tui-grid-cell {
+			/* !important -> 우선순위 높아짐 */
+			background-color: #ffffff !important;
+		}
+		
 		body {
 			padding: 30px;
 		}
@@ -20,61 +23,59 @@
 			width: 1200px;
 			margin: auto;
 			margin-bottom: 100px;
-			
+		}
+		
+		h3 {
+			font-weight: bolder;
 		}
 		
 		#export-btn {
 			margin-left: 520px;
 		}
+		
+		
 	</style>
-
-	<body>
-		<div id="main" class="pt-3">
-			<h3 class="mb-4">위치 기준 정보 조회</h3>
-				
-			<div class="card mb-5" style="width: 50rem;">
-				<h5 class="card-header">면적조사서</h5>
-				<div class="card-body p-3">
-<!-- 					<h5 class="card-title">면적조사서</h5> -->
-<!-- 					<h6 class="card-subtitle mb-2 text-body-secondary">Card subtitle</h6> -->
-					<div class="row m-3" id="basic-table">
-						<div id="grid1"></div>
-					</div>
-					<button type="button" class="btn btn-warning float-end" id="grid1-update" >수정하기</button>
-				</div>
-			</div>
+</head>
+<body>
+	<div id="main" class="pt-3">
+		<h3 class="mb-4">위치 기준 정보 조회</h3>
 			
-			<div class="card mb-5" style="width: 50rem;">
-				<h5 class="card-header">동의서</h5>
-				<div class="card-body p-3">
-<!-- 					<h5 class="card-title">면적조사서</h5> -->
-<!-- 					<h6 class="card-subtitle mb-2 text-body-secondary">Card subtitle</h6> -->
-					<div class="row m-3" id="basic-table">
-						<div id="grid2"></div>
-					</div>
-					<button type="button" class="btn btn-warning float-end" id="grid2-update">수정하기</button>
+		<div class="card mb-5" style="width: 50rem;">
+			<h5 class="card-header">면적조사서</h5>
+			<div class="card-body p-3">
+				<div class="row m-3" id="basic-table">
+					<div id="grid1"></div>
 				</div>
+				<button type="button" class="btn btn-outline-secondary float-end" id="grid1-update" >수정하기</button>
 			</div>
-			
-			<div class="card mb-5" style="width: 50rem;">
-				<h5 class="card-header">계약서</h5>
-				<div class="card-body p-3">
-<!-- 					<h5 class="card-title">면적조사서</h5> -->
-<!-- 					<h6 class="card-subtitle mb-2 text-body-secondary">Card subtitle</h6> -->
-					<div class="row m-3" id="basic-table">
-						<div id="grid3"></div>
-					</div>
-					<button type="button" class="btn btn-warning float-end" id="grid3-update" >수정하기</button>
+		</div>
+		
+		<div class="card mb-5" style="width: 50rem;">
+			<h5 class="card-header">동의서</h5>
+			<div class="card-body p-3">
+				<div class="row m-3" id="basic-table">
+					<div id="grid2"></div>
 				</div>
+				<button type="button" class="btn btn-outline-secondary float-end" id="grid2-update">수정하기</button>
 			</div>
-			<div>
-				<button type="button" class="btn btn-secondary" onclick="history.back()">뒤로가기</button>
-				<button type="button" class="btn btn-success" id="export-btn">엑셀 파일로 다운로드</button>
+		</div>
+		
+		<div class="card mb-5" style="width: 50rem;">
+			<h5 class="card-header">계약서</h5>
+			<div class="card-body p-3">
+				<div class="row m-3" id="basic-table">
+					<div id="grid3"></div>
+				</div>
+				<button type="button" class="btn btn-outline-secondary float-end" id="grid3-update" >수정하기</button>
 			</div>
+		</div>
+		<div>
+			<button type="button" class="btn btn-secondary" onclick="history.back()">뒤로가기</button>
+			<button type="button" class="btn btn-success" id="export-btn">엑셀 파일로 다운로드</button>
+		</div>
 
-		 </div>
-	</body>
-	
+	 </div>
+	 
 	<!-- Bootstrap JS CDN -->
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 	<!-- TOAST UI JS CDN -->
@@ -90,37 +91,43 @@
 			// 면적조사서 그리드 정의
 			const grid1 = new tui.Grid({
 				el: document.getElementById('grid1'),
+				data: [],
 				columns: [
-					{header: '필드명', name: 'field_name'},
-					{header: 'X좌표', name: 'x_crd'},
-					{header: 'Y좌표', name: 'y_crd'},
-					{header: '폰트크기', name: 'font_size'},
+					{header: '순번', name: '순번'},
+					{header: '필드명', name: '필드명', editor: 'text'},
+					{header: 'X좌표', name: 'X좌표', editor: 'text'},
+					{header: 'Y좌표', name: 'Y좌표', editor: 'text'},
+					{header: '폰트크기', name: '폰트크기', editor: 'text'}
 				],
-				data: []
+				editing : true
 			});
 			
 			// 동의서 그리드 정의
 			const grid2 = new tui.Grid({
 				el: document.getElementById('grid2'),
+				data: [],
 				columns: [
-					{header: '필드명', name: 'field_name'},
-					{header: 'X좌표', name: 'x_crd'},
-					{header: 'Y좌표', name: 'y_crd'},
-					{header: '폰트크기', name: 'font_size'},
+					{header: '순번', name: '순번'},
+					{header: '필드명', name: '필드명', editor: 'text'},
+					{header: 'X좌표', name: 'X좌표', editor: 'text'},
+					{header: 'Y좌표', name: 'Y좌표', editor: 'text'},
+					{header: '폰트크기', name: '폰트크기', editor: 'text'}
 				],
-				data: []
+				editing : true
 			});
 			
 			// 계약서 그리드 정의
 			const grid3 = new tui.Grid({
 				el: document.getElementById('grid3'),
+				data: [],
 				columns: [
-					{header: '필드명', name: 'field_name'},
-					{header: 'X좌표', name: 'x_crd'},
-					{header: 'Y좌표', name: 'y_crd'},
-					{header: '폰트크기', name: 'font_size'},
+					{header: '순번', name: '순번'},
+					{header: '필드명', name: '필드명', editor: 'text'},
+					{header: 'X좌표', name: 'X좌표', editor: 'text'},
+					{header: 'Y좌표', name: 'Y좌표', editor: 'text'},
+					{header: '폰트크기', name: '폰트크기', editor: 'text'}
 				],
-				data: []
+				editing : true
 			});
 			
 			// 그리드 데이터 초기화
@@ -144,14 +151,110 @@
 				    console.error("에러 발생:", error);
 				});
 			
-			function update() {
-				
-				
-			}
-			
+
+			// "저장" 버튼 클릭 이벤트 (grid1)
+			$('#grid1-update').on('click', async function () {
+			    const modifiedRows = grid1.getModifiedRows();
+			    if (invalid(modifiedRows)) {
+			        update(grid1, modifiedRows);
+			    }
+			});
+
+			// "저장" 버튼 클릭 이벤트 (grid2)
+			$('#grid2-update').on('click', async function () {
+			    const modifiedRows = grid2.getModifiedRows();
+			    if (invalid(modifiedRows)) {
+			        update(grid2, modifiedRows);
+			    }
+			});
+
+			// "저장" 버튼 클릭 이벤트 (grid3)
+			$('#grid3-update').on('click', async function () {
+			    const modifiedRows = grid3.getModifiedRows();
+			    if (invalid(modifiedRows)) {
+			        update(grid3, modifiedRows);
+			    }
+			});
+
+			// "엑셀 다운로드" 버튼 클릭 이벤트 
+			$('#export-btn').on('click', function () {
+				console.log('엑셀 다운로드 버튼 클릭');
+			    window.location.href = "/api/pos/download";
+			});
+
+		
 			
 		}); // 돔로드 이벤트
 		
+		
+		
+		// 유효성 검사 함수
+		function invalid(modifiedRows) {
+		    console.log("변경된 데이터:", modifiedRows);
+
+		    // 수정된 데이터가 없는 경우
+		    if (modifiedRows.updatedRows.length === 0) {
+		        alert('수정된 데이터가 없습니다.');
+		        return false;
+		    }
+
+		    // 필수 항목 중 빈 필드가 있는지 검사
+		    const invalidRows = modifiedRows.createdRows.filter(row => {
+		        console.log('검사 중인 행 데이터:', row); // 디버깅용 출력
+		        return (
+		            !row.순번 || 
+		            !row.필드명 || 
+		            !row.X좌표 || 
+		            !row.Y좌표 || 
+		            !row.폰트크기 
+		        );
+		    });
+
+		    // 빈 필드가 있는 행이 존재하면 알림 표시 후 중단
+		    if (invalidRows.length > 0) {
+		        console.log('유효하지 않은 행:', invalidRows);
+		        alert('빈 셀이 있습니다.');
+		        return false;
+		    }
+
+		    return true; // 모든 조건 통과
+		}
+
+		
+		function update(grid, modifiedRows) {
+		    const payload = {
+		        ["grid" + (grid === grid1 ? 1 : grid === grid2 ? 2 : 3) + "Data"]: modifiedRows.updatedRows
+		    };
+
+		    axios.post('/api/pos/update', payload)
+		        .then(function () {
+		            alert('데이터가 성공적으로 저장되었습니다.');
+
+		            // ✅ 최신 데이터 다시 불러와 적용
+		            axios.get('/api/pos/check')
+		                .then(function (response) {
+		                    const gridKey = "grid" + (grid === grid1 ? 1 : grid === grid2 ? 2 : 3) + "Data";
+		                    if (response.data[gridKey]) {
+		                        grid.resetData(response.data[gridKey]); // 최신 데이터 반영
+		                    } else {
+		                        console.warn("서버에서 최신 데이터를 받지 못했습니다.");
+		                    }
+		                })
+		                .catch(function (error) {
+		                    console.error('최신 데이터 로드 중 오류 발생:', error);
+		                });
+		        })
+		        .catch(function (error) {
+		            console.error('데이터 저장 중 오류 발생:', error);
+		            alert('데이터 저장 중 문제가 발생했습니다.');
+		        });
+		} // update
+
+
+		
+		
 	</script>
-	
+
+</body>
+		
 </html>
