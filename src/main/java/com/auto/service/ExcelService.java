@@ -66,7 +66,7 @@ public class ExcelService {
     /**
      * 실제 데이터가 있는 마지막 행 번호를 찾는 메서드
      */
-    private int getLastDataRow(Sheet sheet) {
+    public int getLastDataRow(Sheet sheet) {
         int lastRow = sheet.getLastRowNum();
         while (lastRow > 0) {
             Row row = sheet.getRow(lastRow);
@@ -81,7 +81,7 @@ public class ExcelService {
     /**
      * 해당 Row가 완전히 비어있는지 확인하는 메서드
      */
-    private boolean isRowEmpty(Row row) {
+    public boolean isRowEmpty(Row row) {
         if (row == null) {
             return true;
         }
@@ -94,7 +94,7 @@ public class ExcelService {
         return true;
     }
 
-    private Object getCellValue(Cell cell) {
+    public Object getCellValue(Cell cell) {
         switch (cell.getCellType()) {
             case STRING:
                 return cell.getStringCellValue().trim();

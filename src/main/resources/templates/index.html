@@ -64,17 +64,28 @@
 	<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 	
 	<script th:inline="javascript">
-		function openView() {
-			var popupW = 800;
-			var popupH = 550;
-			var left = (document.body.clientWidth / 2) - (popupW / 2);
-			left += window.screenLeft;	 //듀얼 모니터
-			var top = (screen.availHeight / 2) - (popupH / 2);
-			window.open('/work-add', 'work_add', 'width=' + popupW + ',height=' + popupH + ',left=' + left + ',top=' + top + ',scrollbars=yes,resizable=no,toolbar=no,titlebar=no,menubar=no,location=no')
-		}
-		
 		$(function () {
-			
+			$('#inputSubmit').on('click', function (event) {
+			    event.preventDefault();
+				let inputFile = $('#inputFile').val();
+				if(inputFile === null || inputFile === '') {
+					alert("첨부된 파일이 없습니다.");
+					return;
+				}
+				
+			    let formData = new FormData();
+			    formData.append("file", $('#inputFile')[0].files[0]);
+
+			    axios.post('/api/pdf/convert', formData)
+			        .then(response => {
+			            window.location.href = response.data;
+			        })
+			        .catch(error => {
+			            alert("PDF 변환 중 오류 발생");
+			            console.error(error);
+			        });
+			});
+
 		}); // 돔로드 이벤트
 		
 	</script>
