@@ -3,7 +3,7 @@
       xmlns:th="http://www.thymeleaf.org">
 	<head>
 		<meta charset="UTF-8">
-		<title>엑셀 업로드</title>
+		<title>PDF Automation</title>
 	</head>
 	
 	<!-- Bootstrap CSS CDN -->
@@ -16,6 +16,12 @@
 			padding: 30px;
 		}
 		
+		#main {
+			width: 1200px;
+			margin: auto;
+		}
+		
+		
 		form {
 			width: 500px;
 		}
@@ -27,14 +33,19 @@
 	</style>
 
 	<body>
-		<form th:action="@{/excel/read/upload}" method="POST" enctype="multipart/form-data">
-			<span id="span1">데이터 파일 업로드</span>
-			<div class="input-group">
-				<input class="form-control" type="file" th:name="file" id="inputFile" aria-describedby="inputGroupFileAddon04" aria-label="Upload">
-				<button class="btn btn-outline-secondary" th:type="submit" value="업로드" id="inputSubmit">제출</button>
-			</div>
-		</form>
-		<button id="field"  onclick="location.href='join'">기준 정보 조회</button>
+		<div id="main" class="pt-3">
+			<h3 class="mb-5">PDF 변환하기</h3>
+			<form th:action="@{/excel/read/target}" method="POST" enctype="multipart/form-data">
+				<div class="mb-3 ">
+					<label id="span1" for="formFile" class="form-label">데이터 파일 업로드</label>
+					<input class="form-control" type="file" th:name="file" id="inputFile" aria-describedby="inputGroupFileAddon04" aria-label="Upload">
+				</div>
+				<button class="btn btn-outline-danger" th:type="submit" value="업로드" id="inputSubmit">PDF로 변환하기 시작</button>
+			</form>
+			<button type="button" id="field" class="btn btn-success mt-5" onclick="location.href='field-pos'">기준 정보 조회</button>
+			<button type="button" id="field" class="btn btn-warning mt-5" onclick="location.href='field-pos'">양식 확인하기</button>
+			
+		</div>	
 	</body>
 	
 	<!-- Bootstrap JS CDN -->

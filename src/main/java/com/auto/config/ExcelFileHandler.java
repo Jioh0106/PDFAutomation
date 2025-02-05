@@ -3,6 +3,7 @@ package com.auto.config;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -12,6 +13,9 @@ import java.util.List;
  * gradle import APACHE_POI : implementation 'org.apache.poi:poi-ooxml:5.2.3'
  */
 public class ExcelFileHandler {
+	
+    @Value("${file.path}")
+    private String filePath;
 
     /**
      * Excel 파일 읽어서 첫번째 sheet 읽기
