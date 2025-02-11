@@ -1,5 +1,6 @@
 package com.auto.service;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,11 +8,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.crypto.SecretKey;
+import javax.imageio.ImageIO;
 
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.pdmodel.PDPage;
+import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -40,6 +49,8 @@ public class PdfService {
     private ExcelService excelService;
     
     private final SecretKey aesKey;
+    
+    public static final String PDF_FILE_NAME = "merged_images.pdf"; // PDF 파일명
     
     /* *** 배포 시 환경변수 설정 및 변경 필요 *** */
     public PdfService() throws Exception {
@@ -143,6 +154,84 @@ public class PdfService {
         }
     }
     
+    /*
+     *  저장된 이미지를 하나의 PDF로 변환
+     */
+    public String generatePdfFromImages() throws IOException {
+        // 이미지 파일 가져오기 (정렬 포함)
+        List<File> imageFiles = getSortedImageFiles(imageOutputDir);
+        
+        if (imageFiles.isEmpty()) {
+            throw new IOException("이미지 파일이 존재하지 않습니다.");
+        }
 
+        // PDF 저장 경로
+        File pdfFile = new File(pdfOutputDir, PDF_FILE_NAME);
+
+        try (PDDocument document = new PDDocument()) {
+            for (File imageFile : imageFiles) {
+                BufferedImage image = ImageIO.read(imageFile);
+                if (image == null) continue;
+
+                PDPage page = new PDPage();
+                document.addPage(page);
+
+                PDImageXObject pdImage = PDImageXObject.createFromFile(imageFile.getAbsolutePath(), document);
+                try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
+                    contentStream.drawImage(pdImage, 0, 0, page.getMediaBox().getWidth(), page.getMediaBox().getHeight());
+                }
+            }
+            document.save(pdfFile);
+        }
+
+        System.out.println("✅ PDF 생성 완료: " + pdfFile.getAbsolutePath());
+        return pdfFile.getAbsolutePath();
+    }
+
+    /*
+     *  이미지 폴더에서 JPG 파일을 정렬하여 가져오기
+     */
+    private List<File> getSortedImageFiles(String directoryPath) {
+        File dir = new File(directoryPath);
+        if (!dir.exists() || !dir.isDirectory()) {
+            return List.of();
+        }
+        return Arrays.stream(dir.listFiles((dir1, name) -> name.toLowerCase().matches(".*\\.(jpg|jpeg|png)$")))
+                .sorted(Comparator.comparing(File::getName))
+                .collect(Collectors.toList());
+    } 
+    
+    /**
+     * PDF 다운로드 후 생성된 이미지 및 PDF 파일 삭제
+     */
+    public void deleteGeneratedFiles() {
+        deleteFilesInDirectory(imageOutputDir);
+        deleteFilesInDirectory(pdfOutputDir);
+        System.out.println("✅ 변환된 이미지 및 PDF 파일 삭제 완료");
+    }
+
+    /**
+     * 특정 디렉토리 내 파일 삭제 (디렉토리는 유지)
+     */
+    private void deleteFilesInDirectory(String directoryPath) {
+        File dir = new File(directoryPath);
+        if (!dir.exists() || !dir.isDirectory()) {
+            System.out.println("⚠ 삭제할 디렉토리가 존재하지 않습니다: " + directoryPath);
+            return;
+        }
+
+        File[] files = dir.listFiles();
+        if (files == null || files.length == 0) {
+            System.out.println("⚠ 삭제할 파일이 없습니다: " + directoryPath);
+            return;
+        }
+
+        for (File file : files) {
+            if (file.isFile()) {
+                boolean deleted = file.delete();
+                System.out.println(deleted ? "🗑 삭제 성공: " + file.getAbsolutePath() : "❌ 삭제 실패: " + file.getAbsolutePath());
+            }
+        }
+    }
 
 } // PdfService
