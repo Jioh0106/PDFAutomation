@@ -25,11 +25,11 @@ public class ExcelController {
     @Autowired
     private ExcelService excelService;
     
-    @Value("${file.path}") // application.properties의 경로
+    @Value("${file.info-path}") 
     private String excelFilePath;
 
     // 엑셀 데이터 조회 API
-    @GetMapping("/pos/check")
+    @GetMapping("/info/check")
     public ResponseEntity<Map<String, List<Map<String, Object>>>> getExcelData() {
         try {
             Map<String, List<Map<String, Object>>> data = excelService.readExcelData();

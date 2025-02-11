@@ -13,9 +13,12 @@ import java.util.*;
 @Service
 public class ExcelService {
 
-    @Value("${file.path}")
+    @Value("${file.info-path}")
     private String excelFilePath;
-
+    
+    /*
+     * 내부 기준 정보 엑셀 읽기
+     */
     public Map<String, List<Map<String, Object>>> readExcelData() throws IOException {
         File file = new File(excelFilePath);
         if (!file.exists()) {
@@ -62,8 +65,55 @@ public class ExcelService {
         workbook.close();
         return excelData;
     }
+    
+    /*
+     * 복호화 된 엑셀 파일 읽기 (모든 값 String으로 저장) 
+     */
+    public List<Map<String, String>> readExcelData(String filePath) throws IOException {
+        File file = new File(filePath.replace("\\", "/"));
+        if (!file.exists()) {
+            throw new IOException("파일이 존재하지 않습니다: " + filePath);
+        }
 
-    /**
+        List<Map<String, String>> dataList = new ArrayList<>();
+        
+        try (FileInputStream fis = new FileInputStream(file);
+             Workbook workbook = new XSSFWorkbook(fis)) {
+
+            Sheet sheet = workbook.getSheetAt(0);
+            if (sheet == null) {
+                throw new IOException("엑셀 파일에 시트가 존재하지 않습니다: " + filePath);
+            }
+
+            Row headerRow = sheet.getRow(0);
+            if (headerRow == null) {
+                throw new IOException("엑셀 파일에 헤더가 없습니다: " + filePath);
+            }
+
+            // 헤더 정보 추출
+            List<String> headers = new ArrayList<>();
+            for (Cell cell : headerRow) {
+                headers.add(cell.getStringCellValue().trim());
+            }
+
+            // 실제 데이터가 존재하는 행 찾기
+            int lastRow = getLastDataRow(sheet);
+            for (int i = 1; i <= lastRow; i++) { 
+                Row row = sheet.getRow(i);
+                if (row == null || isRowEmpty(row)) continue; // 빈 행 건너뛰기
+
+                Map<String, String> rowData = new HashMap<>();
+                for (int j = 0; j < headers.size(); j++) {
+                    Cell cell = row.getCell(j, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+                    rowData.put(headers.get(j), cell.toString().trim());
+                }
+                dataList.add(rowData);
+            }
+        }
+        return dataList;
+	}
+    
+    /*
      * 실제 데이터가 있는 마지막 행 번호를 찾는 메서드
      */
     public int getLastDataRow(Sheet sheet) {
@@ -78,7 +128,7 @@ public class ExcelService {
         return lastRow;
     }
 
-    /**
+    /*
      * 해당 Row가 완전히 비어있는지 확인하는 메서드
      */
     public boolean isRowEmpty(Row row) {

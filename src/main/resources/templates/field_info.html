@@ -8,8 +8,13 @@
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 	<!-- TOAST UI CSS CDN -->
 	<link rel="stylesheet" href="https://uicdn.toast.com/grid/latest/tui-grid.css" />
-
+	<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+	
 	<style>
+		@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap');
+		* {
+		     font-family: "Noto Sans KR", sans-serif; 
+		}
 		.tui-grid-cell {
 			/* !important -> 우선순위 높아짐 */
 			background-color: #ffffff !important;
@@ -33,12 +38,30 @@
 			margin-left: 520px;
 		}
 		
+		.topBtn {
+			height: 40px !important;
+		}
+		#back-btn {
+			margin-left: 200px;
+		}
 		
+		.card {
+			margin: auto;
+		}
+		
+		.header {
+			margin: auto;
+			margin-left: 200px;
+		}
 	</style>
 </head>
 <body>
-	<div id="main" class="pt-3">
-		<h3 class="mb-4">위치 기준 정보 조회</h3>
+	<div id="main">
+		<div class="d-flex flex-row header">
+			<h3 class="mb-4">위치 기준 정보 조회</h3>
+			<button type="button" class="btn btn-secondary topBtn" id="back-btn" onclick="history.back()">뒤로가기</button>
+			<button type="button" class="btn btn-success topBtn ms-3" id="export-btn">엑셀 파일로 다운로드</button>
+		</div>
 			
 		<div class="card mb-5" style="width: 50rem;">
 			<h5 class="card-header">면적조사서</h5>
@@ -68,10 +91,6 @@
 				</div>
 				<button type="button" class="btn btn-outline-secondary float-end" id="grid3-update" >수정하기</button>
 			</div>
-		</div>
-		<div>
-			<button type="button" class="btn btn-secondary" onclick="history.back()">뒤로가기</button>
-			<button type="button" class="btn btn-success" id="export-btn">엑셀 파일로 다운로드</button>
 		</div>
 
 	 </div>
@@ -131,7 +150,7 @@
 			});
 			
 			// 그리드 데이터 초기화
-			axios.get('/api/pos/check')
+			axios.get('/api/info/check')
 				.then(response => {
 					console.log("성공:", response.data);  // 응답 데이터 출력
 		            if (response.data.grid1Data && response.data.grid2Data && response.data.grid3Data) {
@@ -226,12 +245,12 @@
 		        ["grid" + (grid === grid1 ? 1 : grid === grid2 ? 2 : 3) + "Data"]: modifiedRows.updatedRows
 		    };
 
-		    axios.post('/api/pos/update', payload)
+		    axios.post('/api/info/update', payload)
 		        .then(function () {
 		            alert('데이터가 성공적으로 저장되었습니다.');
 
 		            // ✅ 최신 데이터 다시 불러와 적용
-		            axios.get('/api/pos/check')
+		            axios.get('/api/info/check')
 		                .then(function (response) {
 		                    const gridKey = "grid" + (grid === grid1 ? 1 : grid === grid2 ? 2 : 3) + "Data";
 		                    if (response.data[gridKey]) {
