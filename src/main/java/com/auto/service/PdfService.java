@@ -51,7 +51,7 @@ public class PdfService {
     
     private final SecretKey aesKey;
     
-    public static final String PDF_FILE_NAME = "merged_images.pdf"; // PDF 파일명
+    public static final String PDF_FILE_NAME = "면적조사서_출력용(4장).pdf"; // PDF 파일명
     
     /* *** 배포 시 환경변수 설정 및 변경 필요 *** */
     public PdfService() throws Exception {
@@ -209,8 +209,8 @@ public class PdfService {
                 .collect(Collectors.toList());
     } 
     
-    /**
-     * PDF 다운로드 후 생성된 이미지 및 PDF 파일 삭제
+    /*
+     *  생성된 이미지 및 PDF 파일 삭제 (PDF 다운로드 후 순서)
      */
     public void deleteGeneratedFiles() {
         deleteFilesInDirectory(imageOutputDir);
@@ -218,7 +218,7 @@ public class PdfService {
         System.out.println("✅ 변환된 이미지 및 PDF 파일 삭제 완료");
     }
 
-    /**
+    /*
      * 특정 디렉토리 내 파일 삭제 (디렉토리는 유지)
      */
     private void deleteFilesInDirectory(String directoryPath) {

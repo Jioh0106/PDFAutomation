@@ -91,25 +91,24 @@
 			    let formData = new FormData();
 			    formData.append("file", $('#inputFile')[0].files[0]);
 				
-				// ✅ 로딩 스피너 표시
+				// 로딩 스피너 표시
 				$('#loadingSpinner').removeClass('d-none');
 				
-				setTimeout(() => {
-					axios.post('/api/pdf/convert', formData)
-					    .then(response => {
-					        let downloadUrl = response.data;
-					        window.location.href = downloadUrl;
-					    })
-					    .catch(error => {
-					        alert("PDF 변환 중 오류 발생");
-					        console.error(error);
-					    })
-						.finally(() => {
-		                    // 로딩 스피너 숨기기
-		                    $('#loadingSpinner').addClass('d-none');
-							$('#inputFile').val('');
-		                });
-				}, 100); 
+				// PDF 변환 API 호출
+				axios.post('/api/pdf/convert', formData)
+				    .then(response => {
+				        let downloadUrl = response.data;
+				        window.location.href = downloadUrl;
+				    })
+				    .catch(error => {
+				        alert("PDF 변환 중 오류 발생");
+				        console.error(error);
+				    })
+					.finally(() => {
+	                    // 로딩 스피너 숨기기
+	                    $('#loadingSpinner').addClass('d-none');
+						$('#inputFile').val('');
+	                });
 						
 						
 			}); // 버튼 클릭 이벤트

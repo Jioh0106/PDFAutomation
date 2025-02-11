@@ -1,6 +1,9 @@
 package com.auto.controller;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
@@ -56,6 +59,13 @@ public class PdfController {
     		// 양식 이미지(4장 세트) 타겟 행만큼 복사 및 이름 변경 실행
     		pdfService.copyAndRenameImages(targetData);
     		
+    		// 기준 정보 좌표를 가지고 이미지에 타겟 데이터 텍스트 넣기
+    		// 텍스트를 삽입한 이미지를 저장할 때는 암호화해서 해당 폴더에 다시 저장
+    		
+    		
+    		
+    		// PDF 변환할 때 이미지 파일 복호화해서 가지고 와야 함
+    		
     		// PDF 변환 실행
             String pdfPath = pdfService.generatePdfFromImages();
     		
@@ -88,15 +98,23 @@ public class PdfController {
         }
 
         Resource resource = new FileSystemResource(pdfFile);
+        try {
+            // ✅ 한글 파일명 UTF-8 인코딩 (공백 처리 포함)
+            String encodedFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8.toString())
+                    .replaceAll("\\+", "%20");
 
-        // 🕒 10초 후 파일 삭제 (다운로드 이후 삭제하도록 변경)
-        scheduleFileDeletion(10);
+            // 🕒 10초 후 파일 삭제 (다운로드 이후 삭제하도록 변경)
+            scheduleFileDeletion(10);
 
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + encodedFileName)
+                    .contentType(MediaType.APPLICATION_PDF)
+                    .body(resource);
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName)
-                .contentType(MediaType.APPLICATION_PDF)
-                .body(resource);
+        } catch (UnsupportedEncodingException e) {
+            return ResponseEntity.internalServerError().body(null);
+        }
+        
 
     } // downloadPdf
     
