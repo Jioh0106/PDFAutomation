@@ -41,7 +41,7 @@ public class ExcelController {
     
     
     // 엑셀 파일 다운로드 API
-    @GetMapping("/pos/download")
+    @GetMapping("/info/download")
     public ResponseEntity<Resource> downloadExcel() throws IOException {
         File file = new File(excelFilePath);
         if (!file.exists()) {

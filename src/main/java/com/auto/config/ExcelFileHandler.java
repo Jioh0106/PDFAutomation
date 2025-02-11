@@ -16,6 +16,9 @@ public class ExcelFileHandler {
 	
     @Value("${file.path}")
     private String filePath;
+    
+    @Value("${file.upload-dir}")
+    private String uploadFilePath;
 
     /**
      * Excel 파일 읽어서 첫번째 sheet 읽기

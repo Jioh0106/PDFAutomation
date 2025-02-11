@@ -50,8 +50,8 @@
 				</div>
 			</div>
 		</form>
-		<button type="button" id="field" class="btn btn-success mt-5" onclick="location.href='field-pos'">기준 정보 조회</button>
-		<button type="button" id="field" class="btn btn-warning mt-5" onclick="location.href='images-viewer'">양식 확인하기</button>
+		<button type="button" id="field" class="btn btn-success mt-5" onclick="location.href='/field-info'">기준 정보 조회</button>
+		<button type="button" id="field" class="btn btn-warning mt-5" onclick="openView()">양식 확인하기</button>
 		
 	</div>	
 	<!-- Bootstrap JS CDN -->
@@ -85,8 +85,19 @@
 			            console.error(error);
 			        });
 			});
+			
 
 		}); // 돔로드 이벤트
+		// 팝업창 가운데 위치(듀얼모니터 포함)
+		function openView() {
+			var url = '/images-viewer';
+			var popupW = 900;
+			var popupH = 2000;
+			var left = (document.body.clientWidth / 2) - (popupW / 2);
+			left += window.screenLeft;	 //듀얼 모니터
+			var top = (screen.availHeight / 2) - (popupH / 2);
+			window.open(url, 'popup', 'width=' + popupW + ',height=' + popupH + ',left=' + left + ',top=' + top + ',scrollbars=yes,resizable=no,toolbar=no,titlebar=no,menubar=no,location=no')
+		}
 		
 	</script>
 </body>

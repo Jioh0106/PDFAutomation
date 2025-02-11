@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class MainController {
 	
 	
-	@GetMapping("/field-pos")
-	public String fieldPos(Model model) {
-		return "field_pos";
+	@GetMapping("/field-info")
+	public String fieldInfo(Model model) {
+		return "field_info";
 	}
 	
 	@GetMapping("/images-viewer")
