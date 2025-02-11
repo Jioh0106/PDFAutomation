@@ -20,6 +20,7 @@ import javax.imageio.ImageIO;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
+import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.graphics.image.PDImageXObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -172,13 +173,20 @@ public class PdfService {
             for (File imageFile : imageFiles) {
                 BufferedImage image = ImageIO.read(imageFile);
                 if (image == null) continue;
-
-                PDPage page = new PDPage();
+                
+                // 원본 이미지 크기 가져오기
+                float imageWidth = image.getWidth();
+                float imageHeight = image.getHeight();
+                
+                // PDF 페이지 크기를 이미지 크기에 맞춤
+                PDPage page = new PDPage(new PDRectangle(imageWidth, imageHeight));
                 document.addPage(page);
 
                 PDImageXObject pdImage = PDImageXObject.createFromFile(imageFile.getAbsolutePath(), document);
+               
                 try (PDPageContentStream contentStream = new PDPageContentStream(document, page)) {
-                    contentStream.drawImage(pdImage, 0, 0, page.getMediaBox().getWidth(), page.getMediaBox().getHeight());
+                	// 이미지의 원래 크기로 PDF에 삽입 (비율 유지)
+                	contentStream.drawImage(pdImage, 0, 0, imageWidth, imageHeight);
                 }
             }
             document.save(pdfFile);
