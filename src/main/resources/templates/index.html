@@ -55,22 +55,22 @@
 		<div class="mb-5 pb-5 row w-100">
 			<div class="col-5"  id="indutFileArea">
 				<label id="span1" for="formFile" class="form-label">데이터 파일 업로드</label>
-				<input class="form-control form-control-lg" type="file" th:name="file" id="inputFile" aria-describedby="inputGroupFileAddon04" aria-label="Upload">
+				<input class="form-control" type="file" th:name="file" id="inputFile" aria-describedby="inputGroupFileAddon04" aria-label="Upload">
 			</div>
 			<div class="col-3 d-flex align-items-end" id="selectArea">
-				<select class="form-select form-select-lg" id="region">
+				<select class="form-select" id="region">
 					<option selected disabled>공사명 선택(필수)</option>
 					<option th:each="data : ${selectList}" th:value="${data['시공사']}" th:text="${data['공사명']}"></option>
 				</select>
 			</div>	
 			<div class="col-4 d-flex align-items-end" id="btnArea">
-				<button class="btn btn-outline-danger btn-lg" th:type="submit" value="업로드" id="inputSubmit">PDF로 변환하기 시작</button>
+				<button class="btn btn-outline-danger " th:type="submit" value="업로드" id="inputSubmit">PDF로 변환하기 시작</button>
 			</div>
 		</div>
 		<div class="mt-5 pt-5">
-			<button type="button" id="field-btn" class="btn btn-success me-3 btn-lg" onclick="location.href='/field-info'">좌표 기준 정보 조회</button>
-			<button type="button" id="region-btn" class="btn btn-warning me-3 btn-lg" onclick="location.href='/region-info'">시공사 정보 조회</button>
-			<button type="button" id="images-btn" class="btn btn-warning me-3 btn-lg" onclick="openView()">양식 이미지 확인하기</button>
+			<button type="button" id="field-btn" class="btn btn-success me-3" onclick="location.href='/field-info'">좌표 기준 정보 조회</button>
+			<button type="button" id="region-btn" class="btn btn-warning me-3 " onclick="location.href='/region-info'">시공사 정보 조회</button>
+			<button type="button" id="images-btn" class="btn btn-warning me-3 " onclick="openView()">양식 이미지 확인하기</button>
 		</div>
 
 		<!-- 로딩 스피너 (초기 숨김) -->

@@ -48,6 +48,9 @@ public class PdfService {
     @Value("${pdf.output-dir}") // 생성된 PDF 폴더
     private String pdfOutputDir;
     
+    @Value("${file.fonts-path}") // 내부 폰트 경로 - 나눔고딕
+    private String fontsPath;
+    
     @Autowired
     private ExcelService excelService;
     
@@ -251,6 +254,7 @@ public class PdfService {
 	public void generateImage(List<Map<String, String>> targetData, Map<String, List<Map<String, Object>>> posData, 
 								Map<String, List<Map<String, Object>>> regionData, String regionNum) throws IOException {
 		
+		
 		List<String> savedImagePaths = new ArrayList<>();
 		
 		// 저장할 폴더 생성 (존재하지 않으면)
@@ -314,7 +318,8 @@ public class PdfService {
 	                float x = getSafeFloatValue(fieldData, "X좌표", 0.0f);
 	                float y = getSafeFloatValue(fieldData, "Y좌표", 0.0f);
 	                String key = (String) fieldData.get("필드명");
-	                String text = target.getOrDefault(key, "");
+	                String text = target.getOrDefault(key, "").trim();
+	                String date = "2025.\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0.\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0.";
 
 	                // 특정 필드명에 대한 값 변경
 	                if (key.equals("용역명")) text = val1;
@@ -326,18 +331,18 @@ public class PdfService {
 	                if (key.equals("회사등록번호")) text = val7;
 	                if (key.equals("회사전화번호")) text = val8;
 	                if (key.equals("조사원명")) text = val9;
-	                if (key.equals("계약담당자")) text = val10;
+	                if (key.equals("계약담당자명")) text = val10;
 	                if (key.equals("계약회사")) text = val4;
 	                if (key.equals("계약부서")) text = "운영지원팀";
 	                if (key.equals("감독부서")) text = "운영지원팀";
-	                if (key.equals("주민번호")) text = target.get("생년월일").replace(".", "").substring(2, 8);
-	                if (key.equals("계약일자")) text = "2025.\u00A0\u00A0.\u00A0\u00A0.";
-	                if (key.equals("확인일자")) text = "2025.\u00A0\u00A0.\u00A0\u00A0.";
+	                if (key.equals("주민번호")) text = target.get("생년월일").replace(".", "").substring(2, 8) + " - ";
+	                if (key.equals("계약일자")) text = date;
+	                if (key.equals("확인일자")) text = date;
+	                if (key.equals("동의일자")) text = date;
+	                
 	                if(key.equals("구분") && text.equals("일반")) {
 						text = "□ 우선지원가구   ■ 일반가구";
-					} 
-					
-					if(key.equals("구분") && !text.equals("일반")) {
+					} else if(key.equals("구분") && !text.equals("일반")) {
 						text = "■ 우선지원가구   □ 일반가구";
 					}
 	                
@@ -348,9 +353,17 @@ public class PdfService {
 						text = target.get("감독관");
 					}
 					
+					
+					try {
+					    File fontFile = new File(fontsPath); 
+					    Font customFont = Font.createFont(Font.TRUETYPE_FONT, fontFile).deriveFont(Font.PLAIN, fontSize);
+					    g2d.setFont(customFont);
+					} catch (Exception e) {
+					    e.printStackTrace();
+					    g2d.setFont(new Font("SansSerif", Font.PLAIN, fontSize)); // 기본 폰트 적용
+					}
 
-	                g2d.setFont(new Font("Dialog", Font.PLAIN, fontSize));
-	                g2d.drawString(text, x, y);
+					g2d.drawString(text, x, y);
 	            }
 
 				g2d.dispose(); // 리소스 해제
