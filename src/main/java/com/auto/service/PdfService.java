@@ -54,15 +54,15 @@ public class PdfService {
     @Autowired
     private ExcelService excelService;
     
+    public static final String PDF_FILE_NAME = "면적조사서_출력용(4장).pdf"; // PDF 파일명
+    
     private final SecretKey aesKey;
     
-    public static final String PDF_FILE_NAME = "면적조사서_출력용(4장).pdf"; // PDF 파일명
     
     /* *** 배포 시 환경변수 설정 및 변경 필요 *** */
     public PdfService() throws Exception {
         // AES 키 생성 및 저장 (운영 환경에서는 안전한 저장 방식 필요)
         this.aesKey = AESUtil.generateAESKey();
-        System.out.println("*** AES Secret Key: " + AESUtil.encodeKey(aesKey)); // 실제 운영에서는 노출 X 삭제하기
     }
     
     
@@ -319,7 +319,7 @@ public class PdfService {
 	                float y = getSafeFloatValue(fieldData, "Y좌표", 0.0f);
 	                String key = (String) fieldData.get("필드명");
 	                String text = target.getOrDefault(key, "").trim();
-	                String date = "2025.\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0.\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0.";
+	                String date = "2025.\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0.\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\\00A0.";
 
 	                // 특정 필드명에 대한 값 변경
 	                if (key.equals("용역명")) text = val1;
@@ -376,11 +376,12 @@ public class PdfService {
 				    System.out.println("🔴 순번 값이 비어 있어 처리할 수 없습니다. (index: " + i + ")");
 				    continue;
 				}
-	
 				String index = indexStr.split("\\.")[0]; // "1.0" → "1" 순번 값에서 정수 부분만 추출
+				// 🔹 숫자를 최소 2자리(01, 02...) 또는 3자리(001, 002...)로 맞추기
+				String formattedIndex = String.format("%02d", Integer.parseInt(index));
 				
 				// 이미지 파일 저장 경로
-				String outputFilePath = imageOutputDir + "/" + index + "-" + (imgIndex +1) + ".jpg";
+				String outputFilePath = imageOutputDir + "/" + formattedIndex + "-" + (imgIndex +1) + ".jpg";
 				File outputFile = new File(outputFilePath);
 				ImageIO.write(image, "jpg", outputFile);
 				
