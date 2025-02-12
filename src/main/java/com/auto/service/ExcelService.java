@@ -13,14 +13,71 @@ import java.util.*;
 @Service
 public class ExcelService {
 
-    @Value("${file.info-path}")
-    private String excelFilePath;
+    @Value("${file.pos-info-path}")
+    private String posFilePath;
+    
+    @Value("${file.region-info-path}")
+    private String regionFilePath;
+    
+    
+    public List<Map<String, String>> readSelectData() throws IOException {
+    	File file = new File(regionFilePath);
+    	if (!file.exists()) {
+            throw new IOException("Excel 파일이 존재하지 않습니다: " + file.getAbsolutePath());
+        }
+    	
+    	List<Map<String, String>> selectList = new ArrayList<>();
+    	
+    	try (FileInputStream fis = new FileInputStream(file);
+                Workbook workbook = new XSSFWorkbook(fis)) {
+
+               Sheet sheet = workbook.getSheetAt(0);
+               if (sheet == null) {
+                   throw new IOException("엑셀 파일에 시트가 존재하지 않습니다: " + regionFilePath);
+               }
+
+               Row headerRow = sheet.getRow(0);
+               if (headerRow == null) {
+                   throw new IOException("엑셀 파일에 헤더가 없습니다: " + regionFilePath);
+               }
+
+               // 헤더 정보 추출
+               List<String> headers = new ArrayList<>();
+               for (Cell cell : headerRow) {
+                   headers.add(cell.getStringCellValue().trim());
+               }
+
+               // 실제 데이터가 존재하는 행 찾기
+               int lastRow = getLastDataRow(sheet);
+               for (int i = 1; i <= lastRow; i++) { 
+                   Row row = sheet.getRow(i);
+                   if (row == null || isRowEmpty(row)) continue; // 빈 행 건너뛰기
+
+                   Map<String, String> rowData = new HashMap<>();
+                   for (int j = 0; j < headers.size(); j++) {
+                       Cell cell = row.getCell(j, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK);
+                       rowData.put(headers.get(j), cell.toString().trim());
+                   }
+                   selectList.add(rowData);
+               }
+           }
+           return selectList;
+    	
+    	
+	}
+    
     
     /*
-     * 내부 기준 정보 엑셀 읽기
+     * 내부 엑셀 파일 읽기 - 여러 시트가 있는 엑셀 파일
      */
-    public Map<String, List<Map<String, Object>>> readExcelData() throws IOException {
-        File file = new File(excelFilePath);
+    public Map<String, List<Map<String, Object>>> readExcelDataALL(String type) throws IOException {
+    	String filePath = posFilePath;
+    	
+    	if(type.equals("region")) {
+    		filePath = regionFilePath;
+    	}
+    	
+        File file = new File(filePath);
         if (!file.exists()) {
             throw new IOException("Excel 파일이 존재하지 않습니다: " + file.getAbsolutePath());
         }
@@ -31,6 +88,7 @@ public class ExcelService {
 
         for (int i = 0; i < workbook.getNumberOfSheets(); i++) {
             Sheet sheet = workbook.getSheetAt(i);
+            String sheetName = sheet.getSheetName();
             List<Map<String, Object>> sheetData = new ArrayList<>();
 
             Row headerRow = sheet.getRow(0); // 첫 번째 행(헤더)
@@ -59,7 +117,7 @@ public class ExcelService {
                 sheetData.add(rowData);
             }
 
-            excelData.put("grid" + (i + 1) + "Data", sheetData);
+            excelData.put(sheetName, sheetData);
         }
 
         workbook.close();
@@ -67,7 +125,7 @@ public class ExcelService {
     }
     
     /*
-     * 복호화 된 엑셀 파일 읽기 (모든 값 String으로 저장) 
+     * 복호화 된 엑셀 파일 읽기 (한 개의 시트 / 모든 값 String으로 저장) 
      */
     public List<Map<String, String>> readExcelData(String filePath) throws IOException {
         File file = new File(filePath.replace("\\", "/"));
@@ -158,4 +216,6 @@ public class ExcelService {
                 return "";
         }
     }
+
+	
 }

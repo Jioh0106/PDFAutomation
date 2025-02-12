@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class ExcelFileHandler {
 	
-    @Value("${file.info-path}")
+    @Value("${file.pos-info-path}")
     private String filePath;
     
     @Value("${file.upload-dir}")

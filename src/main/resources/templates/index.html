@@ -3,6 +3,7 @@
       xmlns:th="http://www.thymeleaf.org">
 <head>
 	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>PDF Automation</title>
 
 	<!-- Bootstrap CSS CDN -->
@@ -15,6 +16,7 @@
 		@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap');
 		* {
 		     font-family: "Noto Sans KR", sans-serif; 
+		     font-size: 18px;
 		}
 		body {
 			padding: 30px;
@@ -25,18 +27,23 @@
 			margin: auto;
 		}
 		
-		
-		form {
-			width: 700px;
-		}
-		
 		#span1 {
 			font-weight: bolder;
-			font-size: 20px;
+			font-size: 25px;;
 		}
 		
 		h3 {
 			font-weight: bolder;
+		}
+		
+		#region-btn {
+			background-color: #ff6137;
+			color : white;
+		}
+		
+		#region-btn:hover {
+			background-color: #fa4f22;
+			color: white;
 		}
 		
 	</style>
@@ -44,20 +51,27 @@
 	
 <body>
 	<div id="main" class="pt-3">
-		<h3 class="mb-5">PDF 변환하기</h3>
-		<form th:action="@{/excel/read/target}" method="POST" enctype="multipart/form-data">
-			<div class="mb-3 row">
-				<div class="col">
-					<label id="span1" for="formFile" class="form-label">데이터 파일 업로드</label>
-					<input class="form-control" type="file" th:name="file" id="inputFile" aria-describedby="inputGroupFileAddon04" aria-label="Upload">
-				</div>
-				<div class="col d-flex align-items-end">
-					<button class="btn btn-outline-danger" th:type="submit" value="업로드" id="inputSubmit">PDF로 변환하기 시작</button>
-				</div>
+		<h3 class="mb-5 pb-5">PDF 변환하기</h3>
+		<div class="mb-5 pb-5 row w-100">
+			<div class="col-5"  id="indutFileArea">
+				<label id="span1" for="formFile" class="form-label">데이터 파일 업로드</label>
+				<input class="form-control form-control-lg" type="file" th:name="file" id="inputFile" aria-describedby="inputGroupFileAddon04" aria-label="Upload">
 			</div>
-		</form>
-		<button type="button" id="field" class="btn btn-success mt-5" onclick="location.href='/field-info'">기준 정보 조회</button>
-		<button type="button" id="field" class="btn btn-warning mt-5" onclick="openView()">양식 확인하기</button>
+			<div class="col-3 d-flex align-items-end" id="selectArea">
+				<select class="form-select form-select-lg" id="region">
+					<option selected disabled>공사명 선택(필수)</option>
+					<option th:each="data : ${selectList}" th:value="${data['시공사']}" th:text="${data['공사명']}"></option>
+				</select>
+			</div>	
+			<div class="col-4 d-flex align-items-end" id="btnArea">
+				<button class="btn btn-outline-danger btn-lg" th:type="submit" value="업로드" id="inputSubmit">PDF로 변환하기 시작</button>
+			</div>
+		</div>
+		<div class="mt-5 pt-5">
+			<button type="button" id="field-btn" class="btn btn-success me-3 btn-lg" onclick="location.href='/field-info'">좌표 기준 정보 조회</button>
+			<button type="button" id="region-btn" class="btn btn-warning me-3 btn-lg" onclick="location.href='/region-info'">시공사 정보 조회</button>
+			<button type="button" id="images-btn" class="btn btn-warning me-3 btn-lg" onclick="openView()">양식 이미지 확인하기</button>
+		</div>
 
 		<!-- 로딩 스피너 (초기 숨김) -->
 		<div id="loadingSpinner" class="d-none position-fixed top-50 start-50 translate-middle text-center">
@@ -67,6 +81,7 @@
 		    <p class="text-black mt-2">변환 중입니다...</p>
 		</div>
 	</div>	<!--main-->
+	
 	<!-- Bootstrap JS CDN -->
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 	<!-- TOAST UI JS CDN -->
@@ -83,32 +98,40 @@
 				
 			    event.preventDefault();
 				let inputFile = $('#inputFile').val();
+				let construction = $("#construction").val();
 				if(inputFile === null || inputFile === '') {
 					alert("첨부된 파일이 없습니다.");
 					return;
 				}
 				
+				if(construction === null || construction === '' ) {
+					alert("공사명을 선택해 주세요.");
+					$("#construction").focus();
+					return;	
+				}
+				
 			    let formData = new FormData();
 			    formData.append("file", $('#inputFile')[0].files[0]);
+			    formData.append("regionNum", $('#region').val());
 				
 				// 로딩 스피너 표시
 				$('#loadingSpinner').removeClass('d-none');
 				
 				// PDF 변환 API 호출
 				axios.post('/api/pdf/convert', formData)
-				    .then(response => {
-				        let downloadUrl = response.data;
-				        window.location.href = downloadUrl;
-				    })
-				    .catch(error => {
-				        alert("PDF 변환 중 오류 발생");
-				        console.error(error);
-				    })
-					.finally(() => {
-	                    // 로딩 스피너 숨기기
-	                    $('#loadingSpinner').addClass('d-none');
-						$('#inputFile').val('');
-	                });
+			    .then(response => {
+			        let downloadUrl = response.data;
+			        window.location.href = downloadUrl;
+			    })
+			    .catch(error => {
+			        alert("PDF 변환 중 오류 발생");
+			        console.error(error);
+			    })
+				.finally(() => {
+                    // 로딩 스피너 숨기기
+                    $('#loadingSpinner').addClass('d-none');
+					$('#inputFile').val('');
+                });
 						
 						
 			}); // 버튼 클릭 이벤트

@@ -44,7 +44,8 @@ public class PdfController {
     
 
     @PostMapping("/convert")
-    public ResponseEntity<String> convertToPdf(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<String> convertToPdf(@RequestParam("file") MultipartFile file, @RequestParam("regionNum") String regionNum) {
+    	System.out.println("regionNum = " + regionNum);
     	try {
     		// 업로드된 타켓 파일을 AES 암호화 후 저장
     		String encryptedFilePath = pdfService.saveUploadedFile(file.getInputStream(), file.getOriginalFilename());
@@ -52,28 +53,34 @@ public class PdfController {
     		// 복호화 후 타겟 엑셀 데이터 읽기
     		List<Map<String, String>> targetData = pdfService.readEncryptedExcelData(encryptedFilePath);
     		
-    		// 내부 기준 정보 엑셀 파일 데이터 읽기
-    		Map<String, List<Map<String, Object>>> infoData = excelService.readExcelData();
-    		System.out.println("infoData = " + infoData.toString());
+    		// 내부 위치 기준 정보 엑셀 파일 데이터 읽기
+    		Map<String, List<Map<String, Object>>> posData = excelService.readExcelDataALL("pos");
+    		System.out.println("posData = " + posData.toString());
     		
-    		// 양식 이미지(4장 세트) 타겟 행만큼 복사 및 이름 변경 실행
-    		pdfService.copyAndRenameImages(targetData);
+    		// 내부 시공사 정보 엑셀 파일 데이터 읽기
+    		Map<String, List<Map<String, Object>>> regionData = excelService.readExcelDataALL("region");
+    		System.out.println("regionData = " + regionData.toString());
     		
-    		// 기준 정보 좌표를 가지고 이미지에 타겟 데이터 텍스트 넣기
-    		// 텍스트를 삽입한 이미지를 저장할 때는 암호화해서 해당 폴더에 다시 저장
+    		/*
+    		// *양식 이미지(4장 세트) 타겟 행만큼 복사 및 이름 변경 실행
+//    		pdfService.copyAndRenameImages(targetData);
     		
-    		
-    		
-    		// PDF 변환할 때 이미지 파일 복호화해서 가지고 와야 함
-    		
-    		// PDF 변환 실행
-            String pdfPath = pdfService.generatePdfFromImages();
-    		
+    		// *기준 정보 좌표를 가지고 이미지에 타겟 데이터 텍스트 넣기
+    		// *텍스트를 삽입한 이미지를 저장할 때는 암호화해서 해당 폴더에 다시 저장
     		for(int i = 0; i < targetData.size(); i++ ) {
     			System.out.println("targetData " + i + " = " + targetData.get(i));
     			String index = targetData.get(i).get("순번").split("\\.")[0];
-    			
     		}
+    		*/
+    		
+    		// PDF 변환할 때 이미지 파일 복호화해서 가지고 와야 함
+    		// 이미지 삽입, 복사, 이름 변경하기
+    		pdfService.generateImage(targetData, posData, regionData, regionNum);    		
+    		
+    		
+    		// 최종 PDF 변환 실행
+            pdfService.generatePdfFromImages();
+    		
             
             return ResponseEntity.ok("/api/pdf/download?file=" + PdfService.PDF_FILE_NAME);
             
@@ -99,7 +106,7 @@ public class PdfController {
 
         Resource resource = new FileSystemResource(pdfFile);
         try {
-            // ✅ 한글 파일명 UTF-8 인코딩 (공백 처리 포함)
+            // 한글 파일명 UTF-8 인코딩 (공백 처리 포함)
             String encodedFileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8.toString())
                     .replaceAll("\\+", "%20");
 
