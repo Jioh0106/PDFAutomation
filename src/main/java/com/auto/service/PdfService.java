@@ -30,6 +30,8 @@ import org.springframework.stereotype.Service;
 
 import com.auto.config.AESUtil;
 
+import jakarta.servlet.ServletContext;
+
 @Service
 public class PdfService {
 	
@@ -53,6 +55,9 @@ public class PdfService {
     
     @Autowired
     private ExcelService excelService;
+    
+    @Autowired
+    private ServletContext servletContext;
     
     public static final String PDF_FILE_NAME = "면적조사서_출력용(4장).pdf"; // PDF 파일명
     
@@ -319,7 +324,7 @@ public class PdfService {
 	                float y = getSafeFloatValue(fieldData, "Y좌표", 0.0f);
 	                String key = (String) fieldData.get("필드명");
 	                String text = target.getOrDefault(key, "").trim();
-	                String date = "2025.\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0.\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\\00A0.";
+	                String date = "2025.\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0.\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\00A0.";
 
 	                // 특정 필드명에 대한 값 변경
 	                if (key.equals("용역명")) text = val1;

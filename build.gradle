@@ -14,6 +14,13 @@ java {
 	}
 }
 
+war {
+    from('storage') {
+        include '**/*'  // 폴더 내부의 모든 파일 포함
+        into 'WEB-INF/storage'
+    }
+}
+
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
