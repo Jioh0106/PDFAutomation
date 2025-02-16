@@ -201,6 +201,10 @@ public class PdfService {
             }
             document.save(pdfFile);
         }
+        
+        if (!pdfFile.exists()) {
+            throw new IOException("PDF 변환 중 오류 발생: 파일이 존재하지 않습니다. 경로: " + pdfFile);
+        }
 
         System.out.println("✅ PDF 생성 완료: " + pdfFile.getAbsolutePath());
         
@@ -324,7 +328,7 @@ public class PdfService {
 	                float y = getSafeFloatValue(fieldData, "Y좌표", 0.0f);
 	                String key = (String) fieldData.get("필드명");
 	                String text = target.getOrDefault(key, "").trim();
-	                String date = "2025.\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0.\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\00A0.";
+	                String date = "2025.\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0.\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0\u00A0.";
 
 	                // 특정 필드명에 대한 값 변경
 	                if (key.equals("용역명")) text = val1;

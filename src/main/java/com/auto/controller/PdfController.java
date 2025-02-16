@@ -47,39 +47,39 @@ public class PdfController {
     public ResponseEntity<String> convertToPdf(@RequestParam("file") MultipartFile file, @RequestParam("regionNum") String regionNum) {
     	System.out.println("regionNum = " + regionNum);
     	try {
-    		// 업로드된 타켓 파일을 AES 암호화 후 저장
-    		String encryptedFilePath = pdfService.saveUploadedFile(file.getInputStream(), file.getOriginalFilename());
+    		if (file.isEmpty()) {
+                System.out.println("❌ 파일이 비어 있음");
+                return ResponseEntity.badRequest().body("파일이 비어 있습니다.");
+            }
 
-    		// 복호화 후 타겟 엑셀 데이터 읽기
-    		List<Map<String, String>> targetData = pdfService.readEncryptedExcelData(encryptedFilePath);
+            System.out.println("📂 업로드된 파일 이름: " + file.getOriginalFilename());
+            System.out.println("📏 파일 크기: " + file.getSize());
+            
+    		// 1. 업로드된 타켓 파일을 AES 암호화 후 저장
+    		String encryptedFilePath = pdfService.saveUploadedFile(file.getInputStream(), file.getOriginalFilename());
+    		System.out.println("1. 업로드된 타켓 파일을 AES 암호화 후 저장 성공");
     		
-    		// 내부 위치 기준 정보 엑셀 파일 데이터 읽기
+    		// 2. 복호화 후 타겟 엑셀 데이터 읽기
+    		List<Map<String, String>> targetData = pdfService.readEncryptedExcelData(encryptedFilePath);
+    		System.out.println("2. 업로드 엑셀 파일 복호화 후 타겟 엑셀 데이터 읽기 성공");
+    		
+    		// 3. 내부 위치 기준 정보 엑셀 파일 데이터 읽기
     		Map<String, List<Map<String, Object>>> posData = excelService.readExcelDataALL("pos");
+    		System.out.println("3. 내부 위치 기준 정보 엑셀 파일 데이터 읽기 성공");
     		System.out.println("posData = " + posData.toString());
     		
-    		// 내부 시공사 정보 엑셀 파일 데이터 읽기
+    		// 4. 내부 시공사 정보 엑셀 파일 데이터 읽기
     		Map<String, List<Map<String, Object>>> regionData = excelService.readExcelDataALL("region");
+    		System.out.println("4. 내부 시공사 정보 엑셀 파일 데이터 읽기 성공");
     		System.out.println("regionData = " + regionData.toString());
     		
-    		/*
-    		// *양식 이미지(4장 세트) 타겟 행만큼 복사 및 이름 변경 실행
-//    		pdfService.copyAndRenameImages(targetData);
+    		// 5. 이미지에 텍스트 삽입, 복사, 이름 변경하기
+    		pdfService.generateImage(targetData, posData, regionData, regionNum);    	
+    		System.out.println("5. 이미지에 텍스트 삽입 변환 성공");
     		
-    		// *기준 정보 좌표를 가지고 이미지에 타겟 데이터 텍스트 넣기
-    		// *텍스트를 삽입한 이미지를 저장할 때는 암호화해서 해당 폴더에 다시 저장
-    		for(int i = 0; i < targetData.size(); i++ ) {
-    			System.out.println("targetData " + i + " = " + targetData.get(i));
-    			String index = targetData.get(i).get("순번").split("\\.")[0];
-    		}
-    		*/
-    		
-    		// PDF 변환할 때 이미지 파일 복호화해서 가지고 와야 함
-    		// 이미지 삽입, 복사, 이름 변경하기
-    		pdfService.generateImage(targetData, posData, regionData, regionNum);    		
-    		
-    		
-    		// 최종 PDF 변환 실행
+    		// 6. 최종 PDF 변환 실행
             pdfService.generatePdfFromImages();
+            System.out.println("6. 최종 PDF 변환 실행 성공");
     		
             
             return ResponseEntity.ok("/api/pdf/download?file=" + PdfService.PDF_FILE_NAME);

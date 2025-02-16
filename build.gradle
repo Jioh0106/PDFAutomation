@@ -14,13 +14,6 @@ java {
 	}
 }
 
-war {
-    from('storage') {
-        include '**/*'  // 폴더 내부의 모든 파일 포함
-        into 'WEB-INF/storage'
-    }
-}
-
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor
@@ -35,6 +28,9 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	compileOnly 'org.projectlombok:lombok'
+	runtimeOnly 'com.h2database:h2'
+	runtimeOnly 'com.oracle.database.jdbc:ojdbc11'
+		
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
